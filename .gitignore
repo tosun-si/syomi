@@ -1,0 +1,37 @@
+.DS_Store
+node_modules/
+appdroits-ui/dist/
+appdroits-ui/node_modules/
+npm-debug.log*
+appdroits-ui/test/unit/coverage
+package-lock.json
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+
+**.iml
+*/velocity.log
+*/.idea/
+**/.idea/
+swagger.json
+
+# Eclipse
+.classpath
+.settings
+.metadata
+
+/.project
+*/.classpath
+*/.metadata
+*/org.eclipse.core.resources.prefs
+*/.project
+*/.settings
+*/target/
+target/
+appdroits-ws/src/main/webapp/index.html
