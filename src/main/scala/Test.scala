@@ -1,5 +1,7 @@
 import java.util.Objects
 
+import org.tosunsi.sgoku.Validator
+
 object Test {
 
   def main(args: Array[String]): Unit = {
@@ -8,12 +10,12 @@ object Test {
     val toto = "test"
 
     val res1 = toto match {
-      case "g" => () => 10
+      case "g"    => () => 10
       case "test" => () => 400
     }
 
     val res2 = toto match {
-      case x if test(x) => "toto"
+      case x if test(x)  => "toto"
       case x if test2(x) => "tata"
     }
 
@@ -33,7 +35,7 @@ object Test {
     )
 
     Validator.of(personObject)
-      .validate(_.firstName)(Objects.nonNull)("The fisrt name should not be null")
+      .validate(_.firstName)(Objects.nonNull)("The first name should not be null")
       .validate(_.lastName)(_.nonEmpty)("The last name should not be empty")
       .validate(_.firstName)(!"toto".equals(_))("The first name should different from toto")
       .validate(_.age)(_.equals(25))("The age should be equals to 25")
