@@ -49,6 +49,7 @@ case class Validator[+A](private val element: A, errorMessages: List[String]) {
   /**
    * Gets the given generic object or throws an IllegalArgumentException.
    */
+  @throws(classOf[IllegalArgumentException])
   def getOrElseThrow: A = {
     getOrElseThrow(classOf[IllegalArgumentException])
   }
@@ -59,6 +60,7 @@ case class Validator[+A](private val element: A, errorMessages: List[String]) {
    * @param exceptionClass exception class
    * @tparam E type of exception
    */
+  @throws(classOf[RuntimeException])
   def getOrElseThrow[E <: RuntimeException](exceptionClass: Class[E]): A = {
     errorMessages match {
       case err if errorMessages.isEmpty => element

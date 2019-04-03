@@ -14,6 +14,8 @@ Sbt
 
 ## Validator
 
+### 1 General presentation of the API
+
 The goal of the validator is to validates the fields of a generic object.
 Firstly we call a factory method in order to initialize the monad.
 After that, the call of validate method allows to do a projection on a field of this object, and to apply a predicate on this.
@@ -54,4 +56,56 @@ _.firstName
 ```
 
 By inference, the API knows that the input of this function projection is the generic object (in this case person passed in the "of" method).
+
+Then we can apply a predicate on the field (via the previous projection) : 
+
+```scala
+Objects.nonNull
+``` 
+
+```scala
+firstName => Objects.nonNull(firstName)
+``` 
+
+```scala
+firstName => firstName != null
+```
+
+The third parameter is the message for the error case.
+
+```scala
+"The first name should not be null"
+```
+
+The api stack all the messages that correspond to error cases.
+
+If the given object (in of) is null, then all the "validate" cases are considered as errors.
+
+### 2 Jump to a nested object
+
+The API allows to jump to a nested object, via the "thenTo" method.
+For example, if a Person object has a nested address, we can orient the validator to this : 
+
+```scala
+val address = Address(
+  street = "44 street",
+  city = "Paris",
+  zipCode = "75015"
+)
+
+val person = Person(
+  firstName = "toto",
+  lastName = "tata",
+  age = 30,
+  address = address
+)
+
+Validator.of(person)
+  .validate(_.firstName)(Objects.nonNull)("The first name should not be null")
+  .validate(_.firstName)(!"toto".equals(_))("The first name should different from toto")
+  .validate(p => p.lastName)(_.nonEmpty)("The last name should not be empty")
+  .validate(_.age)(_.equals(25))("The age should be equals to 25")
+  .getOrElseThrow(classOf[IllegalStateException])
+
+```   
 
