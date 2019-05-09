@@ -63,8 +63,8 @@ case class Validator[+A](private val element: A, errorMessages: List[String]) {
   @throws(classOf[RuntimeException])
   def getOrElseThrow[E <: RuntimeException](exceptionClass: Class[E]): A = {
     errorMessages match {
-      case err if errorMessages.isEmpty => element
-      case _                            => throw getErrorMessagesException(exceptionClass)
+      case err if err.isEmpty => element
+      case _                  => throw getErrorMessagesException(exceptionClass)
     }
   }
 
@@ -76,8 +76,8 @@ case class Validator[+A](private val element: A, errorMessages: List[String]) {
    */
   def getOrElseThrow[E <: RuntimeException](exceptionInstance: => RuntimeException): A = {
     errorMessages match {
-      case err if errorMessages.isEmpty => element
-      case _                            => throw addErrorMessagesToException(exceptionInstance)
+      case err if err.isEmpty => element
+      case _                  => throw addErrorMessagesToException(exceptionInstance)
     }
   }
 
@@ -95,8 +95,8 @@ case class Validator[+A](private val element: A, errorMessages: List[String]) {
    */
   def toEither: Either[List[String], A] = {
     errorMessages match {
-      case err if errorMessages.isEmpty => Right(element)
-      case _                            => Left(errorMessages)
+      case err if err.isEmpty => Right(element)
+      case _                  => Left(errorMessages)
     }
   }
 
