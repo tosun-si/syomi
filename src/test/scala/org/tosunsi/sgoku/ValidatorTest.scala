@@ -5,12 +5,12 @@ import java.util.Objects
 import org.scalatest.{FlatSpecLike, Matchers}
 import org.tosunsi.sgoku.TestSettings._
 import org.tosunsi.sgoku.ValidatorTest._
-import org.tosunsi.sgoku.pojo.Person
+import org.tosunsi.sgoku.pojo.{Address, Person}
 
 import scala.collection.immutable.Nil
 
 /**
- * Contains the tests of [[Validator]]
+ * Contains the tests of [[Validator]] class.
  */
 class ValidatorTest extends FlatSpecLike with Matchers {
 
@@ -103,7 +103,7 @@ class ValidatorTest extends FlatSpecLike with Matchers {
     errorMessagesResult should contain(AGE_GREATER_THAN_ZERO)
   }
 
-  "GIVEN an object with errors WHEN validate it with 'toOption' THEN" should "get an Option with error messages" in {
+  "GIVEN an object with errors WHEN validate it with 'toErrorsOption' THEN" should "get an Option with error messages" in {
     // Given.
     val person = getPersonWithErrorFields
 
@@ -121,6 +121,35 @@ class ValidatorTest extends FlatSpecLike with Matchers {
     errorMessagesResult should contain(AGE_GREATER_THAN_ZERO)
   }
 
+  "GIVEN an object with errors in nested object, via 'thenTo' WHEN validate it with 'toErrors' THEN" should "get the expected error messages" in {
+    // Given.
+    val person = getPersonWithErrorFieldsInAddress
+
+    // When.
+    val errorMessagesResult: List[String] = Validator.of(person)
+      .validate(_.firstName)(Objects.nonNull)(FIRST_NAME_NOT_NULL)
+      .validate(_.firstName)(isNotEmpty)(FIRST_NAME_NOT_EMPTY)
+      .validate(_.lastName)(isNotEmpty)(LAST_NAME_NOT_EMPTY)
+      .validate(_.age)(age => age > 0)(AGE_GREATER_THAN_ZERO)
+      .thenTo(_.address)
+      .validate(_.street)(Objects.nonNull)(STREET_NOT_NULL)
+      .validate(_.street)(isNotEmpty)(STREET_NOT_EMPTY)
+      .validate(_.zipCode)(Objects.nonNull)(ZIP_CODE_NOT_NULL)
+      .validate(_.zipCode)(isNotEmpty)(ZIP_CODE_NOT_EMPTY)
+      .validate(_.city)(Objects.nonNull)(CITY_CODE_NOT_NULL)
+      .validate(_.city)(isNotEmpty)(CITY_CODE_NOT_EMPTY)
+      .toErrors
+
+    // Then.
+    errorMessagesResult shouldNot contain(STREET_NOT_NULL)
+    errorMessagesResult shouldNot contain(STREET_NOT_EMPTY)
+
+    errorMessagesResult shouldNot contain(ZIP_CODE_NOT_NULL)
+    errorMessagesResult should contain(ZIP_CODE_NOT_EMPTY)
+    errorMessagesResult shouldNot contain(CITY_CODE_NOT_NULL)
+    errorMessagesResult should contain(CITY_CODE_NOT_EMPTY)
+  }
+
   /**
    * Gets a [[Person]] object with error fields.
    */
@@ -129,6 +158,24 @@ class ValidatorTest extends FlatSpecLike with Matchers {
       firstName = PERSON_FIRST_NAME,
       lastName = "",
       age = 0
+    )
+  }
+
+  /**
+   * Gets a [[Person]] object with error fields in the nested [[Address]] object.
+   */
+  private def getPersonWithErrorFieldsInAddress: Person = {
+    val address = Address(
+      street = ADDRESS_STREET,
+      zipCode = "",
+      city = ""
+    )
+
+    Person(
+      firstName = PERSON_FIRST_NAME,
+      lastName = PERSON_LAST_NAME,
+      age = PERSON_AGE,
+      address = address
     )
   }
 
@@ -144,5 +191,11 @@ object ValidatorTest {
   val LAST_NAME_NOT_EMPTY = "The last name should not be empty"
   val AGE_NOT_NULL = "The age should not be null"
   val AGE_GREATER_THAN_ZERO = "The age should be greater that 0"
-}
 
+  val STREET_NOT_NULL = "The street should not be null"
+  val STREET_NOT_EMPTY = "The street should not be empty"
+  val ZIP_CODE_NOT_NULL = "The zip code should not be null"
+  val ZIP_CODE_NOT_EMPTY = "The zip code should not be empty"
+  val CITY_CODE_NOT_NULL = "The city should not be null"
+  val CITY_CODE_NOT_EMPTY = "The city should not be empty"
+}

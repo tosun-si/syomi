@@ -1,4 +1,4 @@
-name := "sgoku"
+name := "syomi"
 
 version := "0.1.0"
 

@@ -1,4 +1,4 @@
-# SGOKU
+# SYOMI
 
 The goal of this api is to give some functional and util classes for Scala.
 
@@ -89,8 +89,8 @@ For example, if a Person object has a nested address, we can orient the validato
 ```scala
 val address = Address(
   street = "44 street",
-  city = "Paris",
-  zipCode = "75015"
+  zipCode = "75015",
+  city = "Paris"
 )
 
 val person = Person(
@@ -101,11 +101,18 @@ val person = Person(
 )
 
 Validator.of(person)
-  .validate(_.firstName)(Objects.nonNull)("The first name should not be null")
-  .validate(_.firstName)(!"toto".equals(_))("The first name should different from toto")
-  .validate(p => p.lastName)(_.nonEmpty)("The last name should not be empty")
-  .validate(_.age)(_.equals(25))("The age should be equals to 25")
-  .getOrElseThrow(classOf[IllegalStateException])
+  .validate(_.firstName)(Objects.nonNull)(FIRST_NAME_NOT_NULL)
+  .validate(_.firstName)(isNotEmpty)(FIRST_NAME_NOT_EMPTY)
+  .validate(_.lastName)(isNotEmpty)(LAST_NAME_NOT_EMPTY)
+  .validate(_.age)(age => age > 0)(AGE_GREATER_THAN_ZERO)
+  .thenTo(_.address)
+  .validate(_.street)(Objects.nonNull)(STREET_NOT_NULL)
+  .validate(_.street)(isNotEmpty)(STREET_NOT_EMPTY)
+  .validate(_.zipCode)(Objects.nonNull)(ZIP_CODE_NOT_NULL)
+  .validate(_.zipCode)(isNotEmpty)(ZIP_CODE_NOT_EMPTY)
+  .validate(_.city)(Objects.nonNull)(CITY_CODE_NOT_NULL)
+  .validate(_.city)(isNotEmpty)(CITY_CODE_NOT_EMPTY)
+  .toErrors
 
 ```   
 
