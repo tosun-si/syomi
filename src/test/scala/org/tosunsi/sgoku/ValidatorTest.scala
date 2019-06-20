@@ -116,6 +116,7 @@ class ValidatorTest extends FlatSpecLike with Matchers {
       .toErrorsOption
 
     // Then.
+    result shouldNot be(None)
     val errorMessagesResult: List[String] = result.get
     errorMessagesResult should contain(LAST_NAME_NOT_EMPTY)
     errorMessagesResult should contain(AGE_GREATER_THAN_ZERO)
