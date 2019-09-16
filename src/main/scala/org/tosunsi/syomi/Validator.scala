@@ -1,4 +1,4 @@
-package org.tosunsi.sgoku
+package org.tosunsi.syomi
 
 /**
  * Monad that allows to validate a generic object.
@@ -82,15 +82,6 @@ case class Validator[+A](private val element: A, errorMessages: List[String]) {
   }
 
   /**
-   * Throws the given exception that contains all the error messages (suppressed of exception).
-   */
-  def getErrorMessagesException[E <: RuntimeException](exceptionClass: Class[E]): RuntimeException = {
-    val exception: RuntimeException = exceptionClass.getDeclaredConstructor().newInstance()
-
-    addErrorMessagesToException(exception)
-  }
-
-  /**
    * Returns an Either with error messages in left and object in right.
    */
   def toEither: Either[List[String], A] = {
@@ -115,6 +106,15 @@ case class Validator[+A](private val element: A, errorMessages: List[String]) {
    */
   def toErrors: List[String] = {
     errorMessages
+  }
+
+  /**
+   * Throws the given exception that contains all the error messages (suppressed of exception).
+   */
+  private def getErrorMessagesException[E <: RuntimeException](exceptionClass: Class[E]): RuntimeException = {
+    val exception: RuntimeException = exceptionClass.getDeclaredConstructor().newInstance()
+
+    addErrorMessagesToException(exception)
   }
 
   /**

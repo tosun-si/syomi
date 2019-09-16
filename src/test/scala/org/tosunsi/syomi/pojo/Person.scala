@@ -1,4 +1,4 @@
-package org.tosunsi.sgoku.pojo
+package org.tosunsi.syomi.pojo
 
 case class Person(
     firstName: String = "",

@@ -1,3 +1,3 @@
-package org.tosunsi.sgoku
+package org.tosunsi.syomi
 
 class ValidatorException extends RuntimeException

@@ -1,6 +1,8 @@
+package org.tosunsi.syomi
+
 import java.util.Objects
 
-import org.tosunsi.sgoku.Validator
+import org.tosunsi.syomi.pojo.Person
 
 object Test {
 
@@ -40,6 +42,28 @@ object Test {
       .validate(_.firstName)(!"toto".equals(_))("The first name should different from toto")
       .validate(_.age)(_.equals(25))("The age should be equals to 25")
       .getOrElseThrow(classOf[IllegalStateException])
+
+    val test = new ValidatorException
+
+    Validator.of(personObject)
+      .validate(_.firstName)(Objects.nonNull)("The first name should not be null")
+      .validate(_.lastName)(_.nonEmpty)("The last name should not be empty")
+      .validate(_.firstName)(!"toto".equals(_))("The first name should different from toto")
+      .validate(_.age)(_.equals(25))("The age should be equals to 25")
+      .getOrElseThrow(new ValidatorException)
+
+    // Either.
+    val result: Either[List[String], Person] = Validator.of(personObject)
+      .validate(_.firstName)(Objects.nonNull)("The first name should not be null")
+      .validate(_.lastName)(_.nonEmpty)("The last name should not be empty")
+      .validate(_.firstName)(!"toto".equals(_))("The first name should different from toto")
+      .validate(_.age)(_.equals(25))("The age should be equals to 25")
+      .toEither
+
+    result match {
+      case Right(obj)   => println(obj)
+      case Left(errors) => throw new IllegalArgumentException(s"Errors : $errors")
+    }
   }
 
   def test(value: String): Boolean = {

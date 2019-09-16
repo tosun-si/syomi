@@ -1,11 +1,11 @@
-package org.tosunsi.sgoku
+package org.tosunsi.syomi
 
 import java.util.Objects
 
 import org.scalatest.{FlatSpecLike, Matchers}
-import org.tosunsi.sgoku.TestSettings._
-import org.tosunsi.sgoku.ValidatorTest._
-import org.tosunsi.sgoku.pojo.{Address, Person}
+import org.tosunsi.syomi.TestSettings._
+import org.tosunsi.syomi.ValidatorTest._
+import org.tosunsi.syomi.pojo.{Address, Person}
 
 import scala.collection.immutable.Nil
 

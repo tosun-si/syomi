@@ -113,6 +113,118 @@ Validator.of(person)
   .validate(_.city)(Objects.nonNull)(CITY_CODE_NOT_NULL)
   .validate(_.city)(isNotEmpty)(CITY_CODE_NOT_EMPTY)
   .toErrors
-
 ```   
+
+### 3 Return types
+
+#### Error messages with "toErrors"
+
+When we call the "toErrors" methods, the errors are returned in a Scala Seq.
+It corresponds to all the error messages.
+
+```scala
+val errors : Seq[String] = Validator.of(person)
+  .validate(_.firstName)(Objects.nonNull)(FIRST_NAME_NOT_NULL)
+  .validate(_.firstName)(isNotEmpty)(FIRST_NAME_NOT_EMPTY)
+  .validate(_.lastName)(isNotEmpty)(LAST_NAME_NOT_EMPTY)
+  .validate(_.age)(age => age > 0)(AGE_GREATER_THAN_ZERO)
+  .toErrors
+```   
+
+#### Error messages in an Option with "toErrorsOption"
+
+When we call the "toErrorsOption" methods, the error list is wrapped in a scala Option.
+
+```scala
+val errorsOption : Option[Seq[String]] = Validator.of(person)
+  .validate(_.firstName)(Objects.nonNull)(FIRST_NAME_NOT_NULL)
+  .validate(_.firstName)(isNotEmpty)(FIRST_NAME_NOT_EMPTY)
+  .validate(_.lastName)(isNotEmpty)(LAST_NAME_NOT_EMPTY)
+  .validate(_.age)(age => age > 0)(AGE_GREATER_THAN_ZERO)
+  .toErrorsOption
+```   
+
+For example, with the Option, we can chain to another treatment : 
+
+```scala
+Validator.of(person)
+  .validate(_.firstName)(Objects.nonNull)(FIRST_NAME_NOT_NULL)
+  .validate(_.firstName)(isNotEmpty)(FIRST_NAME_NOT_EMPTY)
+  .validate(_.lastName)(isNotEmpty)(LAST_NAME_NOT_EMPTY)
+  .validate(_.age)(age => age > 0)(AGE_GREATER_THAN_ZERO)
+  .toErrorsOption
+  .map(formatErrorMessages)
+
+
+private formatErrorMessages(errors : Seq[String]): Seq[String] = {
+  errors.map(error => s"Error : $error") 
+}  
+```
+
+#### Result in Either : return the given object or errors
+
+With the "toEither" methods, the result is the given object if there is no error (right) or the error list (left).
+
+```scala
+val result: Either[List[String], Person] = Validator.of(personObject)
+  .validate(_.firstName)(Objects.nonNull)("The first name should not be null")
+  .validate(_.lastName)(_.nonEmpty)("The last name should not be empty")
+  .validate(_.firstName)(!"toto".equals(_))("The first name should different from toto")
+  .validate(_.age)(_.equals(25))("The age should be equals to 25")
+  .toEither
+```
+
+Then, for example, we can apply a pattern matching on the result either : 
+
+```scala
+result match {
+  case Right(obj)   => println(obj)
+  case Left(errors) => throw new IllegalArgumentException(s"Errors : $errors")
+}  
+```
+
+#### Performs a side effect and throws an exception with error messages
+
+The api give a method "getOrElseThrow" that performs a side effect and throws an exception.
+
+##### First case, call the method without parameter : 
+
+```scala
+Validator.of(personObject)
+  .validate(_.firstName)(Objects.nonNull)("The first name should not be null")
+  .validate(_.lastName)(_.nonEmpty)("The last name should not be empty")
+  .validate(_.firstName)(!"toto".equals(_))("The first name should different from toto")
+  .validate(_.age)(_.equals(25))("The age should be equals to 25")
+  .getOrElseThrow
+```
+
+In this case a IllegalArgumentException is thrown with all the error messages in the suppressed field.
+So, if the exception is catched, all the error messages can be retrieved.
+
+##### Second case, call the method with the exception class : 
+
+```scala
+Validator.of(personObject)
+  .validate(_.firstName)(Objects.nonNull)("The first name should not be null")
+  .validate(_.lastName)(_.nonEmpty)("The last name should not be empty")
+  .validate(_.firstName)(!"toto".equals(_))("The first name should different from toto")
+  .validate(_.age)(_.equals(25))("The age should be equals to 25")
+  .getOrElseThrow(classOf[ValidatorException])
+```
+
+In this case a ValidatorException is thrown with all the error messages in the suppressed field.
+
+##### Third case, call the method with an exception supplier (a lambda that gives the instance of the exception) : 
+
+```scala
+Validator.of(personObject)
+  .validate(_.firstName)(Objects.nonNull)("The first name should not be null")
+  .validate(_.lastName)(_.nonEmpty)("The last name should not be empty")
+  .validate(_.firstName)(!"toto".equals(_))("The first name should different from toto")
+  .validate(_.age)(_.equals(25))("The age should be equals to 25")
+  .getOrElseThrow(new ValidatorException)
+```
+
+In this case a ValidatorException is thrown with all the error messages in the suppressed field.
+The "new ValidatorException" expression is lazy evaluated.
 

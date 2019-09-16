@@ -1,4 +1,4 @@
-package org.tosunsi.sgoku
+package org.tosunsi.syomi
 
 /**
  * Gives useful constants and methods for all the tests.
