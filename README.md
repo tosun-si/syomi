@@ -228,3 +228,5 @@ Validator.of(personObject)
 In this case a ValidatorException is thrown with all the error messages in the suppressed field.
 The "new ValidatorException" expression is lazy evaluated.
 
+## Checker
+

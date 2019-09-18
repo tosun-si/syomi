@@ -10,20 +10,28 @@ import org.tosunsi.syomi.pojo.{Address, Person}
 import scala.collection.immutable.Nil
 
 /**
- * Contains the tests of [[Validator]] class.
+ * Contains the tests of [[ValidatorList]] class.
  */
-class ValidatorTest extends FlatSpecLike with Matchers {
+class ValidatorListTest extends FlatSpecLike with Matchers {
 
-  "GIVEN an object without error WHEN validate it THEN" should "no error in response" in {
+  "GIVEN a list of objects without error WHEN validate it THEN" should "no error in response" in {
     // Given.
-    val person = Person(
+    val person1 = Person(
       firstName = PERSON_FIRST_NAME,
       lastName = PERSON_LAST_NAME,
       age = PERSON_AGE
     )
 
+    val person2 = Person(
+      firstName = PERSON_FIRST_NAME_2,
+      lastName = PERSON_LAST_NAME_2,
+      age = PERSON_AGE_2
+    )
+
+    val persons = List(person1, person2)
+
     // When.
-    val errorMessages: Seq[String] = Validator.of(person)
+    val errorMessages: Seq[String] = ValidatorList.of(persons)
       .validate(_.firstName)(Objects.nonNull)(FIRST_NAME_NOT_NULL)
       .validate(_.firstName)(isNotEmpty)(FIRST_NAME_NOT_EMPTY)
       .validate(_.lastName)(Objects.nonNull)(LAST_NAME_NOT_NULL)
@@ -37,11 +45,11 @@ class ValidatorTest extends FlatSpecLike with Matchers {
 
   "GIVEN an object with errors WHEN validate it with 'getOrElseThrow' THEN" should "by default throw an IllegalArgumentException with expected messages" in {
     // Given.
-    val person = getPersonWithErrorFields
+    val persons = getPersonsWithErrorFields
 
     // When.
     val caught = intercept[IllegalArgumentException] {
-      Validator.of(person)
+      ValidatorList.of(persons)
         .validate(_.firstName)(Objects.nonNull)(FIRST_NAME_NOT_NULL)
         .validate(_.firstName)(isNotEmpty)(FIRST_NAME_NOT_EMPTY)
         .validate(_.lastName)(isNotEmpty)(LAST_NAME_NOT_EMPTY)
@@ -62,11 +70,11 @@ class ValidatorTest extends FlatSpecLike with Matchers {
 
   "GIVEN an object with errors WHEN validate it with 'getOrElseThrow' and a specified exception THEN" should "throw the given exception with expected messages" in {
     // Given.
-    val person = getPersonWithErrorFields
+    val persons = getPersonsWithErrorFields
 
     // When.
     val caught = intercept[ValidatorException] {
-      Validator.of(person)
+      ValidatorList.of(persons)
         .validate(_.firstName)(Objects.nonNull)(FIRST_NAME_NOT_NULL)
         .validate(_.firstName)(isNotEmpty)(FIRST_NAME_NOT_EMPTY)
         .validate(_.lastName)(isNotEmpty)(LAST_NAME_NOT_EMPTY)
@@ -87,10 +95,10 @@ class ValidatorTest extends FlatSpecLike with Matchers {
 
   "GIVEN an object with errors WHEN validate it with 'toEither' THEN" should "get the error messages in left" in {
     // Given.
-    val person = getPersonWithErrorFields
+    val persons = getPersonsWithErrorFields
 
     // When.
-    val result: Either[Seq[String], Person] = Validator.of(person)
+    val result: Either[Seq[String], Seq[Person]] = ValidatorList.of(persons)
       .validate(_.firstName)(Objects.nonNull)(FIRST_NAME_NOT_NULL)
       .validate(_.firstName)(isNotEmpty)(FIRST_NAME_NOT_EMPTY)
       .validate(_.lastName)(isNotEmpty)(LAST_NAME_NOT_EMPTY)
@@ -105,10 +113,10 @@ class ValidatorTest extends FlatSpecLike with Matchers {
 
   "GIVEN an object with errors WHEN validate it with 'toErrorsOption' THEN" should "get an Option with error messages" in {
     // Given.
-    val person = getPersonWithErrorFields
+    val persons = getPersonsWithErrorFields
 
     // When.
-    val result: Option[Seq[String]] = Validator.of(person)
+    val result: Option[Seq[String]] = ValidatorList.of(persons)
       .validate(_.firstName)(Objects.nonNull)(FIRST_NAME_NOT_NULL)
       .validate(_.firstName)(isNotEmpty)(FIRST_NAME_NOT_EMPTY)
       .validate(_.lastName)(isNotEmpty)(LAST_NAME_NOT_EMPTY)
@@ -154,12 +162,20 @@ class ValidatorTest extends FlatSpecLike with Matchers {
   /**
    * Gets a [[Person]] object with error fields.
    */
-  private def getPersonWithErrorFields: Person = {
-    Person(
+  private def getPersonsWithErrorFields: Seq[Person] = {
+    val person1 = Person(
       firstName = PERSON_FIRST_NAME,
       lastName = "",
       age = 0
     )
+
+    val person2 = Person(
+      firstName = PERSON_FIRST_NAME_2,
+      lastName = "",
+      age = 0
+    )
+
+    Seq(person1, person2)
   }
 
   /**
@@ -185,18 +201,4 @@ class ValidatorTest extends FlatSpecLike with Matchers {
   }
 }
 
-object ValidatorTest {
-  val FIRST_NAME_NOT_NULL = "The first name should not be null"
-  val FIRST_NAME_NOT_EMPTY = "The first name should not be empty"
-  val LAST_NAME_NOT_NULL = "The last name should not be null"
-  val LAST_NAME_NOT_EMPTY = "The last name should not be empty"
-  val AGE_NOT_NULL = "The age should not be null"
-  val AGE_GREATER_THAN_ZERO = "The age should be greater that 0"
 
-  val STREET_NOT_NULL = "The street should not be null"
-  val STREET_NOT_EMPTY = "The street should not be empty"
-  val ZIP_CODE_NOT_NULL = "The zip code should not be null"
-  val ZIP_CODE_NOT_EMPTY = "The zip code should not be empty"
-  val CITY_CODE_NOT_NULL = "The city should not be null"
-  val CITY_CODE_NOT_EMPTY = "The city should not be empty"
-}

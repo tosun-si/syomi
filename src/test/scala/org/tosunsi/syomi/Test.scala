@@ -36,11 +36,19 @@ object Test {
       age = 30
     )
 
+    val personObject2 = Person(
+      firstName = "toto",
+      lastName = "tata",
+      age = 30
+    )
+
     Validator.of(personObject)
       .validate(_.firstName)(Objects.nonNull)("The first name should not be null")
       .validate(_.lastName)(_.nonEmpty)("The last name should not be empty")
       .validate(_.firstName)(!"toto".equals(_))("The first name should different from toto")
       .validate(_.age)(_.equals(25))("The age should be equals to 25")
+      .thenTo(_.address)
+      .validate(_.city)(city => test3(city))("")
       .getOrElseThrow(classOf[IllegalStateException])
 
     val test = new ValidatorException
@@ -53,7 +61,7 @@ object Test {
       .getOrElseThrow(new ValidatorException)
 
     // Either.
-    val result: Either[List[String], Person] = Validator.of(personObject)
+    val result: Either[Seq[String], Person] = Validator.of(personObject)
       .validate(_.firstName)(Objects.nonNull)("The first name should not be null")
       .validate(_.lastName)(_.nonEmpty)("The last name should not be empty")
       .validate(_.firstName)(!"toto".equals(_))("The first name should different from toto")
@@ -64,6 +72,20 @@ object Test {
       case Right(obj)   => println(obj)
       case Left(errors) => throw new IllegalArgumentException(s"Errors : $errors")
     }
+
+
+    val persons = List(personObject, personObject2)
+
+    ValidatorList.of(persons)
+      .validate(_.firstName)(Objects.nonNull)("")
+      .validate(_.lastName)(Objects.nonNull)("")
+      .validate(_.age)(Objects.nonNull)("")
+      .toErrors
+
+    val tuple: Option[(Int, Int)] = for {
+      number1 <- Option(2)
+      number2 <- Option(5)
+    } yield (number1, number2)
   }
 
   def test(value: String): Boolean = {
@@ -72,5 +94,9 @@ object Test {
 
   def test2(value: String): Boolean = {
     value.equals("test")
+  }
+
+  private def test3(toto: String): Boolean = {
+    toto.nonEmpty
   }
 }

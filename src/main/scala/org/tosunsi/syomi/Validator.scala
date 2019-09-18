@@ -14,7 +14,7 @@ package org.tosunsi.syomi
  * @param errorMessages error messages
  * @tparam A type of the generic object
  */
-case class Validator[+A](private val element: A, errorMessages: List[String]) {
+case class Validator[+A](private val element: A, errorMessages: Seq[String]) {
 
   /**
    * Validates a fields of the generic object with the composition of a projection with a predicate on this.
@@ -30,6 +30,13 @@ case class Validator[+A](private val element: A, errorMessages: List[String]) {
     Option(element)
       .map(projection)
       .filter(predicateOnField)
+      .map(_ => this)
+      .getOrElse(Validator(element, errorMessages.:+(message)))
+  }
+
+  def validateOnObject[R](predicateOnObject: A => Boolean)(message: String): Validator[A] = {
+    Option(element)
+      .filter(predicateOnObject)
       .map(_ => this)
       .getOrElse(Validator(element, errorMessages.:+(message)))
   }
@@ -84,27 +91,27 @@ case class Validator[+A](private val element: A, errorMessages: List[String]) {
   /**
    * Returns an Either with error messages in left and object in right.
    */
-  def toEither: Either[List[String], A] = {
+  def toEither: Either[Seq[String], A] = {
     errorMessages match {
       case err if err.isEmpty => Right(element)
-      case _                  => Left(errorMessages)
+      case err                => Left(err)
     }
   }
 
   /**
    * Returns an Option that contains errors.
    */
-  def toErrorsOption: Option[List[String]] = {
+  def toErrorsOption: Option[Seq[String]] = {
     errorMessages match {
       case err if err.isEmpty => None
-      case _                  => Some(errorMessages)
+      case err                => Some(err)
     }
   }
 
   /**
    * Returns errors.
    */
-  def toErrors: List[String] = {
+  def toErrors: Seq[String] = {
     errorMessages
   }
 
