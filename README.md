@@ -17,7 +17,7 @@ Sbt
 ### 1 General presentation of the API
 
 The goal of the validator is to validates the fields of a generic object.
-Firstly we call a factory method in order to initialize the monad.
+Firstly we call a factory method in order to initialize the applicative.
 After that, the call of validate method allows to do a projection on a field of this object, and to apply a predicate on this.
 A message is associated for the eventual error.
 
