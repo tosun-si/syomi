@@ -51,7 +51,7 @@ object Test {
       .validate(_.city)(city => test3(city))("")
       .getOrElseThrow(classOf[IllegalStateException])
 
-    val test = new ValidatorException
+    val testEx = new ValidatorException
 
     Validator.of(personObject)
       .validate(_.firstName)(Objects.nonNull)("The first name should not be null")

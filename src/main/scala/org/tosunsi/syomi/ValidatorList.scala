@@ -6,7 +6,7 @@ package org.tosunsi.syomi
  * @param list generic object (with covariance)
  * @tparam A type of the generic object
  */
-case class ValidatorList[+A](private val list: Seq[A], private val predicatesAndMessages: Seq[(A => Boolean, String)]) {
+case class ValidatorList[A](private val list: Seq[A], private val predicatesAndMessages: Seq[(A => Boolean, String)]) {
 
   /**
    * Validates a fields of the generic object with the composition of a projection with a predicate on this.
@@ -21,7 +21,7 @@ case class ValidatorList[+A](private val list: Seq[A], private val predicatesAnd
   def validate[R](projection: A => R)(predicateOnField: R => Boolean)(message: String): ValidatorList[A] = {
     val composedFunctionOnObject: A => Boolean = projection andThen predicateOnField
 
-    ValidatorList(list, predicatesAndMessages.:+(composedFunctionOnObject, message))
+    ValidatorList(list, predicatesAndMessages.:+((composedFunctionOnObject, message)))
   }
 
   /**
@@ -68,13 +68,11 @@ case class ValidatorList[+A](private val list: Seq[A], private val predicatesAnd
       .flatMap(objectWithIndex => getErrorMessages(objectWithIndex._1, objectWithIndex._2))
   }
 
-  private def getErrorMessages[A](element: A, index: Int): Seq[String] = {
+  private def getErrorMessages(element: A, index: Int): Seq[String] = {
     val validator = Validator.of(element)
 
     predicatesAndMessages
-      .map(pm => validator.validateOnObject(pm._1)(s"[$index] ${pm._2}"))
-
-    validator.errorMessages
+      .flatMap(pm => validator.validateOnObject(pm._1)(s"[$index] ${pm._2}").toErrors)
   }
 
   /**

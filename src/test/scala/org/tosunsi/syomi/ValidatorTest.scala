@@ -85,6 +85,31 @@ class ValidatorTest extends FlatSpecLike with Matchers {
     errorMessagesResult should contain(AGE_GREATER_THAN_ZERO)
   }
 
+  "GIVEN an object with errors WHEN validate it with 'getOrElseThrow', 'validateOnObject' and a specified exception THEN" should "throw the given exception with expected messages" in {
+    // Given.
+    val person = getPersonWithErrorFields
+
+    // When.
+    val caught = intercept[ValidatorException] {
+      Validator.of(person)
+        .validateOnObject(p => Objects.nonNull(p.firstName))(FIRST_NAME_NOT_NULL)
+        .validate(_.firstName)(isNotEmpty)(FIRST_NAME_NOT_EMPTY)
+        .validate(_.lastName)(isNotEmpty)(LAST_NAME_NOT_EMPTY)
+        .validate(_.age)(age => age > 0)(AGE_GREATER_THAN_ZERO)
+        .getOrElseThrow(classOf[ValidatorException])
+    }
+
+    // Then.
+    caught.getSuppressed shouldNot be(Nil)
+
+    val errorMessagesResult: Seq[String] = caught
+      .getSuppressed
+      .map(_.getMessage)
+
+    errorMessagesResult should contain(LAST_NAME_NOT_EMPTY)
+    errorMessagesResult should contain(AGE_GREATER_THAN_ZERO)
+  }
+
   "GIVEN an object with errors WHEN validate it with 'toEither' THEN" should "get the error messages in left" in {
     // Given.
     val person = getPersonWithErrorFields

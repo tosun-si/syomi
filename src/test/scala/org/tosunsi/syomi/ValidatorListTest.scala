@@ -64,8 +64,8 @@ class ValidatorListTest extends FlatSpecLike with Matchers {
       .getSuppressed
       .map(_.getMessage)
 
-    errorMessagesResult should contain(LAST_NAME_NOT_EMPTY)
-    errorMessagesResult should contain(AGE_GREATER_THAN_ZERO)
+    errorMessagesResult should contain(s"[0] $LAST_NAME_NOT_EMPTY")
+    errorMessagesResult should contain(s"[1] $AGE_GREATER_THAN_ZERO")
   }
 
   "GIVEN an object with errors WHEN validate it with 'getOrElseThrow' and a specified exception THEN" should "throw the given exception with expected messages" in {

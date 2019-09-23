@@ -34,7 +34,7 @@ case class Validator[+A](private val element: A, errorMessages: Seq[String]) {
       .getOrElse(Validator(element, errorMessages.:+(message)))
   }
 
-  def validateOnObject[R](predicateOnObject: A => Boolean)(message: String): Validator[A] = {
+  def validateOnObject(predicateOnObject: A => Boolean)(message: String): Validator[A] = {
     Option(element)
       .filter(predicateOnObject)
       .map(_ => this)
